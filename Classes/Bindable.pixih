@@ -1,0 +1,52 @@
+///virtual class Bindable
+///
+///A base class for GUI elements that can be bound to nodes. Bound elements can be processed by parent node and inherit its position.
+///
+///Dependencies: MLGUI.pixih, Node.pixih
+///
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+/**
+ * \brief Adds Bindable properties to entered container without creating a new container. Useful for multiple inheritance in class constructors.
+ * \param $this an output container.
+ * \param $x
+ * \param $y
+ */
+fn MLG_Bindable($this, $x, $y)
+{
+	$this.x=$x
+	$this.y=$y
+
+	$this.parent=-1
+	$this.align=0
+}
+/**
+ * \brief Calculates an inherited x coordinate of Bindable GUI element - its screen coordinate.
+ * \param $this a Bindable GUI element.
+ * \return An inherited x coordinate.
+ * \see MLG_Bindable_get_global_y()
+ */
+fn MLG_Bindable_get_global_x($this)
+{
+	if $this.parent<0
+	{
+		ret(MLG_get_global_x($this))
+	}
+	ret($this.parent.get_child_global_x($this.parent, $this))
+}
+/**
+ * \brief Calculates an inherited y coordinate of Bindable GUI element - its screen coordinate.
+ * \param $this	a Bindable GUI element.
+ * \return An inherited y coordinate.
+ * \see MLG_Bindable_get_global_x()
+ */
+fn MLG_Bindable_get_global_y($this)
+{
+	if $this.parent<0
+	{
+		ret(MLG_get_global_y($this))
+	}
+	ret($this.parent.get_child_global_y($this.parent, $this))
+}

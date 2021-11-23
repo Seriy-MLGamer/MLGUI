@@ -1,0 +1,233 @@
+///class Window: Movable, Node
+///
+///A Window GUI element. It can contain other GUI elements in its graphical environment.
+///
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+MLG_WINDOW_DRAGGABLE=  0b1
+MLG_WINDOW_RESIZABLE= 0b10
+MLG_WINDOW_NO_HEADER=0b100
+MLG_WINDOW_REMOVE_ELEMENTS= 0b1
+MLG_WINDOW_INHERIT_REMOVES=0b10
+
+MLG_WINDOW_SAFE_AREA=20
+
+/**
+ * \brief Alternative constructor. Adds Window properties to entered container without creating new container. Useful for multiple inheritance in class constructors.
+ * \param $this an output container.
+ * \param $title a text on top of Window.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \param $flags flags of Window (how it should work or appear).
+ * \see MLG_Window_new()
+ */
+fn MLG_Window($this, $title, $x, $y, $width, $height, $flags)
+{
+	MLG_Bindable($this, $x, $y)
+	MLG_Node($this)
+
+	$this.title=MLG_Text_new($title, 6, -55, $width, 6)
+	$this.width=$width
+	$this.height=$height
+	$this.flags=$flags
+
+	$this.color=#00FFFF
+	$this.transp=255
+	$this.drag=0
+	$this.drag_x=0
+	$this.drag_y=0
+	$this.images=new(1, 1, INT)
+	$this.texts=new(1, 1, INT)
+	$this.buttons=new(1, 1, INT)
+	$this.get_child_global_x=MLG_get_child_global_x
+	$this.get_child_global_y=MLG_get_child_global_y
+	$this.is_button_active=MLG_Window_is_button_active
+
+	$this.title.parent=$this
+	$this.title.align=TOP|LEFT
+	$this.title.text_align=TOP|LEFT
+	$this.images[0]=-1
+	$this.texts[0]=-1
+	$this.buttons[0]=-1
+}
+/**
+ * \brief Creates a Window GUI element.
+ * \param $title a text on top of Window.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \param $flags flags of Window (how it should work or appear).
+ * \return a container with Window properties.
+ * \see MLG_Window_bind()
+ * \see MLG_Window_unbind()
+ * \see MLG_Window_draw()
+ * \see MLG_Window_handle_events()
+ * \see MLG_Window_remove()
+ */
+fn MLG_Window_new($title, $x, $y, $width, $height, $flags)
+{
+	$window=new()
+	MLG_Window($window, $title, $x, $y, $width, $height, $flags)
+	ret($window)
+}
+/**
+ * \brief Removes a Window.
+ * \param $this a Window GUI element.
+ * \param $flags flags for remove.
+ * \see MLG_Window_unbind()
+ * \see MLG_Window_new()
+ */
+fn MLG_Window_remove($this, $flags)
+{
+	if $this>=0
+	{
+		MLG_Window_unbind($this)
+		remove($this.title)
+		if $flags&MLG_WINDOW_REMOVE_ELEMENTS
+		{
+			$a=0 while $a<get_size($this.images)
+			{
+				MLG_Image_remove($this.images[$a], !!($flags&MLG_WINDOW_INHERIT_REMOVES)*MLG_IMAGE_REMOVE_SOURCE)
+				$a+1
+			}
+			$a=0 while $a<get_size($this.texts)
+			{
+				MLG_Text_remove($this.texts[$a])
+				$a+1	
+			}
+			$a=0 while $a<get_size($this.buttons)
+			{
+				MLG_Button_remove($this.buttons[$a])
+				$a+1
+			}
+		}
+		remove($this.images)
+		remove($this.texts)
+		remove($this.buttons)
+		remove($this)
+	}
+}
+fn MLG_Window_bind($this, $node)
+{
+	if $this.parent>=0
+	{
+		logf("Warning: Window #%i already has a parent.\n", $this)
+		MLG_Window_unbind($this)
+	}
+	MLG_bind_algorithm($this, $node.windows)
+	$this.parent=$node
+}
+fn MLG_Window_unbind($this)
+{
+	MLG_unbind_algorithm($this, $this.parent.windows)
+}
+/**
+ * \brief Draws a Window and its bound elements.
+ * \param $this a Window GUI element.
+ * \see MLG_Window_get_global_x()
+ * \see MLG_Window_get_global_y()
+ * \see MLG_Window_new()
+ */
+fn MLG_Window_draw($this)
+{
+	if $this>=0
+	{
+		$border_alpha=255
+		$title_alpha=128
+		$body_alpha=192
+		$body_saturation=192
+		$body_brightness=64
+		$x=MLG_Bindable_get_global_x($this)
+		$y=MLG_Bindable_get_global_y($this)
+		$width=$this.width*MLG_GUI_SCALE
+		$height=$this.height*MLG_GUI_SCALE
+		$border=60*MLG_GUI_SCALE
+		$safe_area=MLG_WINDOW_SAFE_AREA*MLG_GUI_SCALE
+		if $this.is_button_active($this)
+		{
+			$color=$this.color
+		}
+		else
+		{
+			$color=get_color(128+get_red($this.color)*128 div 256, 128+get_green($this.color)*128 div 256, 128+get_blue($this.color)*128 div 256)
+		}
+		if MLG_COLOR_THEME==MLG_THEME_LIGHT
+		{
+			$body_color=get_color($body_saturation+get_red($color)*$body_saturation div 256, $body_saturation+get_green($color)*$body_saturation div 256, $body_saturation+get_blue($color)*$body_saturation div 256)
+			$this.title.color=BLACK//get_color(get_red($color)*64 div 255, get_green($color)*64 div 255, get_blue($color)*64 div 255)
+		}
+		else{if MLG_COLOR_THEME==MLG_THEME_DARK
+		{
+			$body_color=get_color(get_red($color)*$body_brightness div 255, get_green($color)*$body_brightness div 255, get_blue($color)*$body_brightness div 255)
+			$this.title.color=SNEG
+		}}
+		$transp=get_transp()
+		transp($transp*$this.transp div 255*$body_alpha div 255)
+		fbox($x, $y, $width, $height, $body_color)
+		transp($transp*$this.transp div 255)
+		$a=0 while $a!=get_size($this.images)
+		{
+			MLG_Image_draw($this.images[$a])
+			$a+1
+		}
+		$a=0 while $a!=get_size($this.texts)
+		{
+			MLG_Text_draw($this.texts[$a])
+			$a+1
+		}
+		$a=0 while $a!=get_size($this.buttons)
+		{
+			MLG_Button_draw($this.buttons[$a])
+			$a+1
+		}
+		transp(get_transp()*$title_alpha div 255)
+		fbox($x, $y-$border-1, $width, $border, $color)
+		transp($transp*$this.transp div 255)
+		$this.title.width=$this.width
+		MLG_Text_draw($this.title)
+		transp(get_transp()*$border_alpha div 255)
+		box($x-1, $y-$border-2, $width+1, $height+$border+2, $color)
+		line($x-1, $y-1, $x+$width, $y-1, $color)
+		transp($transp)
+	}
+}	
+/**
+ * \brief Handles events of Window and its bound elments. Put this function in your event loop.
+ * \param $this a Window GUI element.
+ * \see MLG_GUI_handle_events()
+ * \see MLG_Button_handle_events()
+ * \see MLG_Window_new()
+ */
+fn MLG_Window_handle_events($this)
+{
+	if $this>=0
+	{
+		if $this.parent<0
+		{
+			$x=MLG_get_global_x($this)
+			$y=MLG_get_global_y($this)-60*MLG_GUI_SCALE-1
+			$width=$this.width*MLG_GUI_SCALE
+			$height=($this.height+60)*MLG_GUI_SCALE+1
+			$safe_area=MLG_WINDOW_SAFE_AREA*MLG_GUI_SCALE
+			logf("here")
+			MLG_handle_window_events($this, $x, $y, $width, $height, $safe_area, EVT[EVT_X]>=$x-$safe_area&&EVT[EVT_X]<$x+$width+$safe_area&&EVT[EVT_Y]>=$y-$safe_area&&EVT[EVT_Y]<$y+$height+$safe_area)
+		}
+		else
+		{
+			$this.parent.handle_window_events($this.parent, $this)
+		}
+	}
+}
+fn MLG_Window_is_button_active($this)
+{
+	if $this.parent<0
+	{
+		ret(1)
+	}
+	ret($this.parent.is_window_active($this.parent, $this))
+}

@@ -1,0 +1,83 @@
+include "MLGUI.pixih"
+
+MLG_GUI_SCALE=1
+
+guy=MLG_GUI_new()
+guy.window_focus=1
+fps=MLG_Text_new("", 0, 0, 0, 4)
+fps.align=TOP|LEFT
+fps.text_align=TOP|LEFT
+MLG_Text_bind(fps, guy)
+wind=MLG_Window_new("ABOBA", -400, -300, 800, 600, MLG_WINDOW_DRAGGABLE|MLG_WINDOW_RESIZABLE)
+MLG_Window_bind(wind, guy)
+butt1=MLG_Button_new("sus", -200-MLG_WINDOW_SAFE_AREA, -100-MLG_WINDOW_SAFE_AREA, 200, 100)
+butt1.align=BOTTOM|RIGHT
+butt1.color=RED
+MLG_Button_set_event_handler(butt1,
+{
+	$a=0 while $a!=16
+	{
+		$alert=MLG_Window_new("U SUS!!!", rand()*((WINDOW_XSIZE-1)/MLG_GUI_SCALE-600)/32768+1/MLG_GUI_SCALE, rand()*((WINDOW_YSIZE-2)/MLG_GUI_SCALE-360)/32768+60+2/MLG_GUI_SCALE, 600, 300, MLG_WINDOW_DRAGGABLE)
+		$alert.align=TOP|LEFT
+		$alert.color=RED
+		MLG_Window_bind($alert, $2)
+		$albut=MLG_Button_new("OK", -200-MLG_WINDOW_SAFE_AREA, -100-MLG_WINDOW_SAFE_AREA, 200, 100)
+		$albut.align=BOTTOM|RIGHT
+		MLG_Button_set_event_handler($albut,
+		{
+			$winbous=$2.parent.windows
+			MLG_Window_remove($2, MLG_WINDOW_REMOVE_ELEMENTS)
+			logf("There are %i windows.\n", get_size($winbous))
+		}, $alert)
+		MLG_Button_bind($albut, $alert)
+		$a+1
+	}
+}, guy)
+MLG_Button_bind(butt1, wind)
+butt2=MLG_Select_new("H*ck No", -400-MLG_WINDOW_SAFE_AREA*2, -100-MLG_WINDOW_SAFE_AREA, 200, 100)
+butt2.align=BOTTOM|RIGHT
+butt2.color=SUN
+MLG_Button_set_event_handler(butt2,
+{
+	if !$1.selected
+	{
+		$2.title.string="OK"
+		$2.color=#00FFFF
+		MLG_Image_bind(MLG_Image_new(load("halo.png"), -200, -200, 400, 400), wind)
+		MLG_Button_set_event_handler($2,
+		{
+			if get_size(guy.windows)==1
+			{
+				MLG_Window_remove(wind, MLG_WINDOW_REMOVE_ELEMENTS)
+				$texst=MLG_Text_new("Welcome!", 0, 0, 0, 8)
+				$texst.color=GREEN
+				MLG_Text_bind($texst, guy)
+				start_timer()
+				timer=1000
+			}
+		})
+	}
+}, butt1)
+MLG_Button_bind(butt2, wind)
+timer=-1
+set_quit_action(QA_NONE)
+set_gl_callback(
+{
+	set_screen(GL_SCREEN)
+	clear()
+	sprintf(fps.string, "FPS: %i", FPS)
+	MLG_GUI_draw(guy)
+	set_screen(0)
+})
+while 1
+{
+	frame()
+	if timer>=0&&get_timer()>=timer
+	{
+		halt
+	}
+	while get_event()
+	{
+		MLG_GUI_handle_events(guy)
+	}
+}

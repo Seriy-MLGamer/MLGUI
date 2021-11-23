@@ -1,0 +1,104 @@
+///class Image: Bindable
+///
+///An Image GUI element. It can display pixel containers and inherit parent's position.
+///
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+MLG_IMAGE_REMOVE_SOURCE=0b1
+
+/**
+ * \brief Alternative constructor. Adds Image properties to entered container without creating a new container. Useful for multiple inheritance in class constructors.
+ * \param $this an output container.
+ * \param $source a pixel container.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \see MLG_Image_new()
+ */
+fn MLG_Image($this, $source, $x, $y, $width, $height)
+{
+	MLG_Bindable($this, $x, $y)
+
+	$this.source=$source
+	$this.width=$width
+	$this.height=$height
+
+	$this.color=WHITE
+	$this.transp=255
+}
+/**
+ * \brief Creates an Image GUI element.
+ * \param $source a pixel container.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \return a container with Image properties.
+ * \see MLG_Image_bind()
+ * \see MLG_Image_unbind()
+ * \see MLG_Image_draw()
+ * \see MLG_Image_remove()
+ */
+fn MLG_Image_new($source, $x, $y, $width, $height)
+{
+	$image=new()
+	MLG_Image($image, $source, $x, $y, $width, $height)
+	ret($image)
+}
+/**
+ * \brief Removes an Image.
+ * \param $this an Image GUI element.
+ * \param $flags flags for remove.
+ * \see MLG_Image_unbind()
+ * \see MLG_Image_new()
+ */
+fn MLG_Image_remove($this, $flags)
+{
+	if $this>=0
+	{
+		MLG_Image_unbind($this)
+		if $flags&MLG_IMAGE_REMOVE_SOURCE
+		{
+			remove_with_alpha($this.source)
+		}
+		remove($this)
+	}
+}
+fn MLG_Image_bind($this, $node)
+{
+	if $this.parent>=0
+	{
+		logf("Warning: Image #%i already has a parent.\n", $this)
+		MLG_Image_unbind($this)
+	}
+	MLG_bind_algorithm($this, $node.images)
+	$this.parent=$node
+}
+fn MLG_Image_unbind($this)
+{
+	MLG_unbind_algorithm($this, $this.parent.images)
+}
+/**
+ * \brief Draws an Image.
+ * \param $this an Image GUI element.
+ * \see MLG_Bindable_get_global_x()
+ * \see MLG_Bindable_get_global_y()
+ * \see MLG_Image_new()
+ */
+fn MLG_Image_draw($this)
+{
+	if $this>=0
+	{
+		$x=MLG_Bindable_get_global_x($this)
+		$y=MLG_Bindable_get_global_y($this)
+		$width=$this.width*MLG_GUI_SCALE
+		$height=$this.height*MLG_GUI_SCALE
+		$transp=get_transp()
+		transp($transp*$this.transp div 255)
+		pixi($this.source, $x+$width div 2, $y+$height div 2, $this.color, $width/get_xsize($this.source), $height/get_ysize($this.source))
+		transp($transp)
+	}
+}

@@ -1,0 +1,253 @@
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+MLG_THEME_LIGHT=0
+MLG_THEME_DARK= 1
+
+MLG_MOBILE=0
+MLG_COLOR_THEME=MLG_THEME_DARK
+MLG_GUI_SCALE=1
+
+fn MLG_bind_algorithm($bindable, $buffer)
+{
+	if $buffer[0]!=-1
+	{
+		resize($buffer, get_size($buffer)+1)
+	}
+	$buffer[get_size($buffer)-1]=$bindable
+}
+fn MLG_unbind_algorithm($bindable, $buffer)
+{
+	if $bindable.parent<0
+	{
+		logf("Warning: Bindable #%i doesn't have a parent.\n", $bindable)
+		ret
+	}
+	$a=0 while $a!=get_size($buffer)
+	{
+		if $buffer[$a]==$bindable
+		{
+			break
+		}
+		$a+1
+	}
+	if $a==get_size($buffer)
+	{
+		logf("Error: Bindable #%i isn't found while unbinding.\n", $bindable)
+		exit(1)
+	}
+	if get_size($buffer)!=1
+	{
+		copy($buffer, $buffer, $a, $a+1, get_size($buffer)-$a-1)
+		resize($buffer, get_size($buffer)-1)
+	}
+	else
+	{
+		$buffer[0]=-1
+	}
+	$bindable.parent=-1
+}
+fn MLG_get_global_x($bindable)
+{
+	$result=$bindable.x*MLG_GUI_SCALE
+	if $bindable.align&LEFT
+	{
+		$result-WINDOW_XSIZE div 2
+	}
+	if $bindable.align&RIGHT
+	{
+		$result+WINDOW_XSIZE div 2
+	}
+	ret($result)
+}
+fn MLG_get_global_y($bindable)
+{
+	$result=$bindable.y*MLG_GUI_SCALE
+	if $bindable.align&TOP
+	{
+		$result-WINDOW_YSIZE div 2
+	}
+	if $bindable.align&BOTTOM
+	{
+		$result+WINDOW_YSIZE div 2
+	}
+	ret($result)
+}
+fn MLG_get_child_global_x($bindable_node, $bindable)
+{
+	$result=$bindable.x+MLG_Bindable_get_global_x($bindable_node)/MLG_GUI_SCALE+$bindable_node.width/2
+	if $bindable.align&LEFT
+	{
+		$result-$bindable_node.width/2
+	}
+	if $bindable.align&RIGHT
+	{
+		$result+$bindable_node.width/2
+	}
+	ret($result*MLG_GUI_SCALE)
+}
+fn MLG_get_child_global_y($bindable_node, $bindable)
+{
+	$result=$bindable.y+MLG_Bindable_get_global_y($bindable_node)/MLG_GUI_SCALE+$bindable_node.height/2
+	if $bindable.align&TOP
+	{
+		$result-$bindable_node.height/2
+	}
+	if $bindable.align&BOTTOM
+	{
+		$result+$bindable_node.height/2
+	}
+	ret($result*MLG_GUI_SCALE)
+}
+fn MLG_handle_window_events($window, $x, $y, $width, $height, $safe_area, $enter)
+{
+	$min_width=400+MLG_WINDOW_SAFE_AREA*3
+	$min_height=100+MLG_WINDOW_SAFE_AREA*2
+	if $window.flags&MLG_WINDOW_DRAGGABLE
+	{
+		if $enter&&EVT[EVT_TYPE]==EVT_MOUSEBUTTONDOWN
+		{
+			$window.drag=1
+			$window.drag_x=EVT[EVT_X]
+			$window.drag_y=EVT[EVT_Y]
+		}
+		else{if EVT[EVT_TYPE]==EVT_MOUSEBUTTONUP
+		{
+			$window.drag=0
+		}}
+		if EVT[EVT_TYPE]==EVT_MOUSEMOVE&&$window.drag
+		{
+			if $window.drag_x>=$x&&$window.drag_x<$x+$width&&$window.drag_y>=$y&&$window.drag_y<$y+60*MLG_GUI_SCALE
+			{
+				$resize_x=EVT[EVT_X]-$window.drag_x
+				$resize_y=EVT[EVT_Y]-$window.drag_y
+				$window.x+$resize_x/MLG_GUI_SCALE
+				$window.y+$resize_y/MLG_GUI_SCALE
+				$resize_x+$x+WINDOW_XSIZE div 2-1
+				$resize_y+$y+WINDOW_YSIZE div 2-1
+				$window.drag_x=EVT[EVT_X]
+				$window.drag_y=EVT[EVT_Y]
+				if $resize_x<0
+				{
+					$window.x-$resize_x/MLG_GUI_SCALE
+					$window.drag_x-$resize_x
+				}
+				if $resize_y<0
+				{
+					$window.y-$resize_y/MLG_GUI_SCALE
+					$window.drag_y-$resize_y
+				}
+				$resize_x+$width-WINDOW_XSIZE+2
+				$resize_y+$height-WINDOW_YSIZE+2
+				if $resize_x>0
+				{
+					$window.x-$resize_x/MLG_GUI_SCALE
+					$window.drag_x-$resize_x
+				}
+				if $resize_y>0
+				{
+					$window.y-$resize_y/MLG_GUI_SCALE
+					$window.drag_y-$resize_y
+				}
+			}
+			else{if $window.flags&MLG_WINDOW_RESIZABLE
+			{
+				if $window.drag_x>=$x-$safe_area&&$window.drag_x<$x
+				{
+					$resize=1
+					$resize_x=(EVT[EVT_X]-$window.drag_x)/MLG_GUI_SCALE
+					$window.x+$resize_x
+					$window.width-$resize_x
+					$window.drag_x=EVT[EVT_X]
+					$resize_x+($x+WINDOW_XSIZE div 2-1)/MLG_GUI_SCALE
+					if $resize_x<0
+					{
+						$window.x-$resize_x
+						$window.width+$resize_x
+						$window.drag_x-$resize_x*MLG_GUI_SCALE
+					}
+					else{if $window.width<$min_width
+					{
+						$window.x+$window.width-$min_width
+						$window.drag_x+($window.width-$min_width)*MLG_GUI_SCALE
+						$window.width=$min_width
+					}}
+				}
+				if $window.drag_y>=$y-$safe_area&&$window.drag_y<$y
+				{
+					$resize=1
+					$resize_y=(EVT[EVT_Y]-$window.drag_y)/MLG_GUI_SCALE
+					$window.y+$resize_y
+					$window.height-$resize_y
+					$window.drag_y=EVT[EVT_Y]
+					$resize_y+($y+WINDOW_YSIZE div 2-1)/MLG_GUI_SCALE
+					if $resize_y<0
+					{
+						$window.y-$resize_y
+						$window.height+$resize_y
+						$window.drag_y-$resize_y*MLG_GUI_SCALE
+					}
+					else{if $window.height<$min_height
+					{
+						$window.y+$window.height-$min_height
+						$window.drag_y+($window.height-$min_height)*MLG_GUI_SCALE
+						$window.height=$min_height
+					}}
+				}
+				if $window.drag_x>=$x+$width&&$window.drag_x<$x+$width+$safe_area
+				{
+					$resize=1
+					$window.width+(EVT[EVT_X]-$window.drag_x)/MLG_GUI_SCALE
+					$window.drag_x=EVT[EVT_X]
+					$resize_x=WINDOW_XSIZE div 2-1-$window.width*MLG_GUI_SCALE-$x
+					if $resize_x<0
+					{
+						$window.drag_x+$resize_x
+						$window.width+$resize_x/MLG_GUI_SCALE
+					}
+					else{if $window.width<$min_width
+					{
+						$window.drag_x+($min_width-$window.width)*MLG_GUI_SCALE
+						$window.width=$min_width
+					}}
+				}
+				if $window.drag_y>=$y+$height&&$window.drag_y<$y+$height+$safe_area
+				{
+					$resize=1
+					$window.height+(EVT[EVT_Y]-$window.drag_y)/MLG_GUI_SCALE
+					$window.drag_y=EVT[EVT_Y]
+					$resize_y=WINDOW_YSIZE div 2-2-($window.height+60)*MLG_GUI_SCALE-$y
+					if $resize_y<0
+					{
+						$window.drag_y+$resize_y
+						$window.height+$resize_y/MLG_GUI_SCALE
+					}
+					else{if $window.height<$min_height
+					{
+						$window.drag_y+($min_height-$window.height)*MLG_GUI_SCALE
+						$window.height=$min_height
+					}}
+				}
+			}}
+		}
+	}
+	if $window.is_button_active($window)
+	{
+		$a=get_size($window.buttons) while $a!=0
+		{
+			$a-1
+			MLG_Button_handle_events($window.buttons[$a])
+		}
+	}
+}
+
+include "Classes/Node.pixih"
+include "Classes/Bindable.pixih"
+include "Classes/Image.pixih"
+include "Classes/Text.pixih"
+include "Classes/Button.pixih"
+include "Classes/Switch.pixih"
+include "Classes/Select.pixih"
+include "Classes/Window.pixih"
+include "Classes/GUI.pixih"

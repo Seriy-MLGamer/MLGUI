@@ -1,0 +1,41 @@
+fn MLG_Switch($this, $title, $x, $y, $width, $height)
+{
+	MLG_Button($this, $title, $x, $y, $width, $height)
+
+	$this.switch_state=0
+	$this.main=MLG_Switch_main
+	$this.draw_colors=MLG_Switch_draw_colors
+}
+fn MLG_Switch_new($title, $x, $y, $width, $height)
+{
+	$switch=new()
+	MLG_Switch($switch, $title, $x, $y, $width, $height)
+	ret($switch)
+}
+fn MLG_Switch_main($this)
+{
+	$this.switch_state^1
+	MLG_Button_main($this)
+}
+fn MLG_Switch_draw_colors($this)
+{
+	if $this.switch_state&&!$this.pressed
+	{
+		$result=new()
+		if $this.entered
+		{
+			$result[0]=get_color(128+get_red($this.color)*96 div 255, 128+get_green($this.color)*96 div 255, 128+get_blue($this.color)*96 div 255)
+		}
+		else
+		{
+			$result[0]=get_color(get_red($this.color)*192 div 255, get_green($this.color)*192 div 255, get_blue($this.color)*192 div 255)
+		}
+		$result.border_alpha=255
+		$result.body_alpha=128
+		ret($result)
+	}
+	else
+	{
+		ret(MLG_Button_draw_colors($this))
+	}
+}

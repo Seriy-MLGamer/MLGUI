@@ -1,0 +1,41 @@
+fn MLG_Select($this, $title, $x, $y, $width, $height)
+{
+	MLG_Button($this, $title, $x, $y, $width, $height)
+
+	$this.selected=0
+	$this.main=MLG_Select_main
+	$this.draw_colors=MLG_Select_draw_colors
+}
+fn MLG_Select_new($title, $x, $y, $width, $height)
+{
+	$select=new()
+	MLG_Select($select, $title, $x, $y, $width, $height)
+	ret($select)
+}
+fn MLG_Select_main($this)
+{
+	MLG_Button_main($this)
+	$this.selected=1
+}
+fn MLG_Select_draw_colors($this)
+{
+	if $this.selected||$this.pressed
+	{
+		ret(MLG_Button_draw_colors($this))
+	}
+	else
+	{
+		$result=new()
+		if $this.entered
+		{
+			$result[0]=get_color(128+get_red($this.color)*127 div 255, 128+get_green($this.color)*127 div 255, 128+get_blue($this.color)*127 div 255)
+			$result.body_alpha=64
+		}
+		else
+		{
+			$result.body_alpha=0
+		}
+		$result.border_alpha=0
+		ret($result)
+	}
+}

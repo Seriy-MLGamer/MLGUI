@@ -1,0 +1,281 @@
+///class Button: Bindable, Node
+///
+///A Button GUI element. You can press this Button! And, of course, it can inherit parent's position.
+///
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+/**
+ * \brief Alternative constructor. Adds Button properties to entered container without creating a new container. Useful for multiple inheritance in class constructors.
+ * \param $this an output container.
+ * \param $title a text on the Button.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \see MLG_Button_new()
+ */
+fn MLG_Button($this, $title, $x, $y, $width, $height)
+{
+	MLG_Bindable($this, $x, $y)
+	MLG_Node($this)
+
+	$this.title=MLG_Text_new($title, 0, 0, $width, 4)
+	$this.width=$width
+	$this.height=$height
+
+	$this.color=#00FFFF
+	$this.transp=255
+	$this.active=1
+	$this.entered=0
+	$this.pressed=0
+	$this.main_event=EVT_BUTTONUP
+	$this.mouse_key=KEY_MOUSE_LEFT
+	$this.keyboard_key=0
+	$this.scancode=0
+	$this.function=0
+	$this.arguments=0 
+	$this.main=MLG_Button_main
+	$this.draw_colors=MLG_Button_draw_colors
+	$this.get_child_global_x=MLG_get_child_global_x
+	$this.get_child_global_y=MLG_get_child_global_y
+
+	$this.title.parent=$this
+}
+/**
+ * \brief Creates a Button GUI element.
+ * \param $title a text on the Button.
+ * \param $x
+ * \param $y
+ * \param $width
+ * \param $height
+ * \return a container with Button properties.
+ * \see MLG_Button_bind()
+ * \see MLG_Button_unbind()
+ * \see MLG_Button_draw()
+ * \see MLG_Button_set_event_handler()
+ * \see MLG_Button_handle_events()
+ * \see MLG_Button_remove()
+ */
+fn MLG_Button_new($title, $x, $y, $width, $height)
+{
+	$button=new()
+	MLG_Button($button, $title, $x, $y, $width, $height)
+	ret($button)
+}
+/**
+ * \brief Removes a Button.
+ * \param $this a Button GUI element.
+ * \see MLG_Button_unbind()
+ * \see MLG_Button_new()
+ */
+fn MLG_Button_remove($this)
+{
+	if $this>=0
+	{
+		MLG_Button_unbind($this)
+		remove($this.title)
+		remove($this)
+	}
+}
+fn MLG_Button_bind($this, $node)
+{
+	if $this.parent>=0
+	{
+		logf("Warning: Button #%i already has a parent.\n", $this)
+		MLG_Button_unbind($this)
+	}
+	MLG_bind_algorithm($this, $node.buttons)
+	$this.parent=$node
+}
+fn MLG_Button_unbind($this)
+{
+	MLG_unbind_algorithm($this, $this.parent.buttons)
+}
+/**
+ * \brief Draws a Button.
+ * \param $this a Button GUI element.
+ * \see MLG_Bindable_get_global_x()
+ * \see MLG_Bindable_get_global_y()
+ * \see MLG_Button_new()
+ */
+fn MLG_Button_draw($this)
+{
+	if $this>=0
+	{
+		$x=MLG_Bindable_get_global_x($this)
+		$y=MLG_Bindable_get_global_y($this)
+		$width=$this.width*MLG_GUI_SCALE
+		$height=$this.height*MLG_GUI_SCALE
+		if $this.parent<0
+		{
+			$active=1
+		}
+		else{if $this.parent.is_button_active($this.parent)&&$this.active
+		{
+			$active=1
+		}
+		else
+		{
+			$active=0
+		}}
+		if $active
+		{
+			$colors=$this.draw_colors($this)
+		}
+		else
+		{
+			$colors=new()
+			$colors[0]=get_color(128+get_red($this.color)*127 div 255, 128+get_green($this.color)*127 div 255, 128+get_blue($this.color)*127 div 255)
+			$colors.border_alpha=255
+			$colors.body_alpha=64
+		}
+		$transp=get_transp()
+		if $colors.body_alpha!=0
+		{
+			transp($transp*$this.transp div 255*$colors.body_alpha div 255)
+			fbox($x, $y, $width, $height, $colors[0])
+		}
+		transp($transp*$this.transp div 255)
+		if MLG_COLOR_THEME==MLG_THEME_LIGHT
+		{
+			$this.title.color=get_color(get_red($this.color)*64 div 255, get_green($this.color)*64 div 255, get_blue($this.color)*64 div 255)
+		}
+		else
+		{
+			$this.title.color=SNEG
+		}
+		$this.title.width=$this.width
+		MLG_Text_draw($this.title)
+		if $colors.border_alpha!=0
+		{
+			transp(get_transp()*$colors.border_alpha div 255)
+			box($x-1, $y-1, $width+1, $height+1, $colors[0])
+		}
+		transp($transp)
+		remove($colors)
+	}
+}
+/**
+ * \brief Binds a function to Button. Then this Button can execute it by press.
+ * \param $this a Button GUI element.
+ * \param $function put here a function. 0 unbinds function.
+ * \param $arguments some user-defined data for function.
+ * \see MLG_Button_bind()
+ * \see MLG_Button_unbind()
+ * \see MLG_Button_handle_events()
+ * \see MLG_Button_new()
+ */
+fn MLG_Button_set_event_handler($this, $function, $arguments)
+{
+	$this.function=$function
+	$this.arguments=$arguments
+}
+/**
+ * \brief Handles events of Button. Put this function in your event loop.
+ * \param $this a Button GUI element.
+ * \see MLG_Button_set_event_handler()
+ * \see MLG_Button_new()
+ */
+fn MLG_Button_handle_events($this)
+{
+	if $this>=0
+	{
+		if $this.active
+		{
+			if EVT[EVT_KEY]==$this.keyboard_key
+			{
+				if EVT[EVT_TYPE]==EVT_BUTTONDOWN
+				{
+					$this.pressed=1
+					if $this.main_event==EVT_BUTTONDOWN
+					{
+						$this.main($this)
+						ret
+					}
+				}
+				else{if EVT[EVT_TYPE]==EVT_BUTTONUP
+				{
+					$this.pressed=0
+					if $this.main_event==EVT_BUTTONUP
+					{
+						$this.main($this)
+						ret
+					}
+				}}
+			}
+			$x=MLG_Bindable_get_global_x($this)
+			$y=MLG_Bindable_get_global_y($this)
+			if EVT[EVT_X]>=$x&&EVT[EVT_X]<$x+$this.width*MLG_GUI_SCALE&&EVT[EVT_Y]>=$y&&EVT[EVT_Y]<$y+$this.height*MLG_GUI_SCALE
+			{
+				if MLG_MOBILE||EVT[EVT_KEY]==$this.mouse_key
+				{
+					if EVT[EVT_TYPE]==EVT_MOUSEBUTTONDOWN||EVT[EVT_TYPE]==EVT_TOUCHBEGIN
+					{
+						$this.scancode=EVT[EVT_SCANCODE]
+						$this.pressed=1
+						$this.entered=1
+						if $this.main_event==EVT_BUTTONDOWN
+						{
+							$this.main($this)
+							ret
+						}
+					}
+					else{if EVT[EVT_TYPE]==EVT_MOUSEBUTTONUP||EVT[EVT_TYPE]==EVT_TOUCHEND&&EVT[EVT_SCANCODE]==$this.scancode
+					{
+						if MLG_MOBILE
+						{
+							$this.entered=0
+						}
+						if $this.pressed
+						{
+							$this.pressed=0
+							if $this.main_event==EVT_BUTTONUP
+							{
+								$this.main($this)
+								ret
+							}
+						}
+					}}
+				}
+				if EVT[EVT_TYPE]==EVT_MOUSEMOVE||EVT[EVT_TYPE]==EVT_TOUCHMOVE
+				{
+					$this.scancode=EVT[EVT_SCANCODE]
+					$this.entered=1
+				}
+			}
+			else{if EVT[EVT_TYPE]==EVT_MOUSEMOVE||EVT[EVT_TYPE]==EVT_TOUCHMOVE&&EVT[EVT_SCANCODE]==$this.scancode
+			{
+				$this.entered=0
+				$this.pressed=0
+			}}
+		}
+	}
+}
+fn MLG_Button_main($this)
+{
+	if $this.function
+	{
+		$this.function($this, $this.arguments)
+	}
+}
+fn MLG_Button_draw_colors($this)
+{
+	$result=new()
+	if $this.pressed
+	{
+		$result[0]=get_color(get_red($this.color)*128 div 255, get_green($this.color)*128 div 255, get_blue($this.color)*128 div 255)
+	}
+	else{if $this.entered
+	{
+		$result[0]=get_color(128+get_red($this.color)*127 div 255, 128+get_green($this.color)*127 div 255, 128+get_blue($this.color)*127 div 255)
+	}
+	else
+	{
+		$result[0]=$this.color
+	}}
+	$result.border_alpha=255
+	$result.body_alpha=64
+	ret($result)
+}

@@ -1,0 +1,109 @@
+///class Text: Bindable
+///
+///A Text GUI element. In difference of default string, this element has font size and position inheritance of movable nodes.
+///
+///"MLGUI" library v0.0.1.
+///(C) Серый MLGamer, 2021.
+///MIT license.
+
+/**
+ * \brief Alternative constructor. Adds Text properties to entered container without creating a new container. Useful for multiple inheritance in class constructors.
+ * \param $this an output container.
+ * \param $string a string contained by an element.
+ * \param $x
+ * \param $y
+ * \param $width a width of word wrap. 0 disables word wrap.
+ * \param $size a scale of font.
+ * \see MLG_Text_new()
+ */
+fn MLG_Text($this, $string, $x, $y, $width, $size)
+{
+	MLG_Bindable($this, $x, $y)
+
+	$this.string=$string
+	$this.width=$width
+	$this.size=$size
+
+	$this.text_align=0
+	$this.transp=255
+
+	if MLG_COLOR_THEME==MLG_THEME_DARK
+	{
+		$this.color=SNEG
+	}
+	else{if MLG_COLOR_THEME==MLG_THEME_LIGHT
+	{
+		$this.color=BLACK
+	}}
+}
+/**
+ * \brief Creates a Text GUI element.
+ * \param $string a string contained by an element.
+ * \param $x
+ * \param $y
+ * \param $width a width of word wrap. 0 disables word wrap.
+ * \param $size a scale of font.
+ * \return a container with Text properties.
+ * \see MLG_Text_bind()
+ * \see MLG_Text_unbind()
+ * \see MLG_Text_draw()
+ * \see MLG_Text_remove()
+ */
+fn MLG_Text_new($string, $x, $y, $width, $size)
+{
+	$text=new()
+	MLG_Text($text, $string, $x, $y, $width, $size)
+	ret($text)
+}
+/**
+ * \brief Removes a text.
+ * \param $this a Text GUI element.
+ * \see MLG_Text_unbind()
+ * \see MLG_Text_new()
+ */
+fn MLG_Text_remove($this)
+{
+	if $this>=0
+	{
+		MLG_Text_unbind($this)
+		remove($this)
+	}
+}
+fn MLG_Text_bind($this, $node)
+{
+	if $this.parent>=0
+	{
+		logf("Warning: Text #%i already has a parent.\n", $this)
+		MLG_Text_unbind($this)
+	}
+	MLG_bind_algorithm($this, $node.texts)
+	$this.parent=$node
+}
+fn MLG_Text_unbind($this)
+{
+	MLG_unbind_algorithm($this, $this.parent.texts)
+}
+/**
+ * \brief Draws a Text.
+ * \param $this a Text GUI element.
+ * \see MLG_Bindable_get_global_x()
+ * \see MLG_Bindable_get_global_y()
+ * \see MLG_Text_new()
+ */
+fn MLG_Text_draw($this)
+{
+	if $this>=0
+	{
+		$x=MLG_Bindable_get_global_x($this)
+		$y=MLG_Bindable_get_global_y($this)
+		$matrix=new(4, 4, FLOAT)
+		t_get_matrix($matrix)
+		t_scale($this.size*MLG_GUI_SCALE, $this.size*MLG_GUI_SCALE, 1)
+		$transp=get_transp()
+		transp($transp*$this.transp div 255)
+		print($this.string, $x/$this.size/MLG_GUI_SCALE, $y/$this.size/MLG_GUI_SCALE, $this.color, $this.text_align, $this.width/$this.size)
+		transp($transp)
+		t_set_matrix($matrix)
+		remove($matrix)
+	}
+}
