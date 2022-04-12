@@ -1,0 +1,97 @@
+/**
+ * Include before.
+ * ../../object/Object.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Position_relative;
+ * A container with element position relative to screen or parent size in range [-1, 1) as fixed point numbers.
+ * @param $x
+ * @param $y
+ * @param $positive aggregator of this object.
+ * @return an instance of class Position_relative.
+ * @see MLG_Position_absolute_new()
+ * @see MLG_Size_relative_new()
+ */
+fn MLG_Position_relative_new($x, $y, $positive)
+{
+	$self=MLG_Object_new()
+	$self.f=MLG_Position_relative
+
+	$self.positive=$positive
+	$self.x=$x
+	$self.y=$y
+
+	ret($self)
+}
+
+fn MLG_Position_relative_get_x($self)
+{
+	$parent=$self.positive.parent
+	ret($parent.f.relative_get_x($parent, $self))
+}
+fn MLG_Position_relative_get_y($self)
+{
+	$parent=$self.positive.parent
+	ret($parent.f.relative_get_y($parent, $self))
+}
+fn MLG_Position_relative_set_x($self, $x)
+{
+	$parent=$self.positive.parent
+	$parent.f.relative_set_x($parent, $self, floor($x*(1<<15)))
+}
+fn MLG_Position_relative_set_y($self, $y)
+{
+	$parent=$self.positive.parent
+	$parent.f.relative_set_y($parent, $self, floor($y*(1<<15)))
+}
+fn MLG_Position_relative_set_absolute_x($self, $x)
+{
+	$parent=$self.positive.parent
+	$parent.f.set_absolute_x($parent, $self, floor($x*(1<<15)))
+}
+fn MLG_Position_relative_set_absolute_y($self, $y)
+{
+	$parent=$self.positive.parent
+	$parent.f.set_absolute_y($parent, $self, floor($y*(1<<15)))
+}
+fn MLG_Position_relative_set_relative_x($self, $x)
+{
+	$self.x=floor($x*(1<<15))
+}
+fn MLG_Position_relative_set_relative_y($self, $y)
+{
+	$self.y=floor($y*(1<<15))
+}
+fn MLG_Position_relative_set_align($self, $align)
+{
+	$parent=$self.positive.parent
+	$parent.f.relative_set_align($parent, $self, $align)
+}
+fn MLG_Position_relative_to_absolute($self)
+{
+	$parent=$self.positive.parent
+	ret($parent.f.position_to_absolute($parent, $self))
+}
+fn MLG_Position_relative_to_relative($self)
+{
+	ret($self)
+}
+
+MLG_Position_relative=clone(MLG_Object)
+
+MLG_Position_relative.get_x=MLG_Position_relative_get_x
+MLG_Position_relative.get_y=MLG_Position_relative_get_y
+MLG_Position_relative.set_x=MLG_Position_relative_set_x
+MLG_Position_relative.set_y=MLG_Position_relative_set_y
+MLG_Position_relative.set_absolute_x=MLG_Position_relative_set_absolute_x
+MLG_Position_relative.set_absolute_y=MLG_Position_relative_set_absolute_y
+MLG_Position_relative.set_relative_x=MLG_Position_relative_set_relative_x
+MLG_Position_relative.set_relative_y=MLG_Position_relative_set_relative_y
+MLG_Position_relative.set_align=MLG_Position_relative_set_align
+MLG_Position_relative.to_absolute=MLG_Position_relative_to_absolute
+MLG_Position_relative.to_relative=MLG_Position_relative_to_relative

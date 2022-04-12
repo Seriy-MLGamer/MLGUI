@@ -1,0 +1,44 @@
+/**
+ * Include before.
+ * ../bindable/Bindable.pixi
+ *
+ * Dependencies.
+ * position/Position_absolute.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Positive extends Bindable;
+ * Class that contains position of element and align to corners of screen or parent.
+ * @param $x position in pixels as fixed point number.
+ * @param $y position in pixels as fixed point number.
+ * @param $align combination of RIGHT, BOTTOM, LEFT and TOP constants.
+ * @return an instance of Positive.
+ * @see MLG_Movable_new()
+ * @see MLG_Transform_new()
+ */
+fn MLG_Positive_new($x, $y, $align)
+{
+	$self=MLG_Bindable_new()
+	$self.f=MLG_Positive
+
+	$self.position=MLG_Position_absolute_new($x, $y, $self)
+	$self.align=$align
+
+	ret($self)
+}
+
+fn MLG_Positive_remove($self)
+{
+	$position=$self.position
+	$position.f.remove($position)
+
+	MLG_Bindable_remove($self)
+}
+
+MLG_Positive=clone(MLG_Bindable)
+
+MLG_Positive.remove=MLG_Positive_remove

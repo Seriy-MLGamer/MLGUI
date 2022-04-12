@@ -1,0 +1,140 @@
+/**
+ * Include before.
+ * system/object/Object.pixi
+ *
+ * Dependencies.
+ * system/Node.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class GUI;
+ * A GUI container. It's useful for safe drawing and handling events of GUI elements with one call or storing GUI patterns.
+ * @return an instance of GUI.
+ * @see MLG_GUI_draw()
+ * @see MLG_GUI_handle_event()
+ * @see MLG_GUI_remove()
+ */
+fn MLG_GUI_new()
+{
+	$self=MLG_Object_new()
+	$self.f=MLG_GUI
+
+	$self.childs=MLG_Node_new()
+
+	ret($self)
+}
+
+/**
+ * Removes a GUI container.
+ * @param $self a GUI container.
+ * @param $flags flags for remove.
+ * @see MLG_GUI_new()
+ */
+fn MLG_GUI_remove($self, $flags)
+{
+	if $self.childs[0]>=0
+	{
+		if $flags&MLG_Bindable_remove_elements
+		{
+			$a=0 while $a<get_size($self.childs)
+			{
+				$object=$self.childs[$a]
+				$object.i_Bindable.remove($object, $flags)
+				$a+1
+			}
+		}
+	}
+	remove($self.childs)
+	remove($self)
+}
+/**
+ * Draws elements bound to the GUI container.
+ * @param $self a GUI container.
+ * @see MLG_GUI_new()
+ */
+fn MLG_GUI_draw($self)
+{
+	for ($a=$self.childs.first_child; $a>=0; $a=$a.next)
+	{
+		$a.f.draw($a)
+	}
+}
+/**
+ * Handles events of elments bound to the GUI container. Put this function in your event loop.
+ * @param $self a GUI container.
+ * @see MLG_Window_handle_event()
+ * @see MLG_Button_handle_event()
+ * @see MLG_GUI_new()
+ */
+fn MLG_GUI_handle_event($self)
+{
+	for ($a=$self.childs.last_child; $a>=0; $a=$a.prev)
+	{
+		$a.f.handle_event($a)
+	}
+}
+fn MLG_GUI_get_child_global_x($this, $bindable)
+{
+	ret(MLG_get_global_x($bindable))
+}
+fn MLG_GUI_get_child_global_y($this, $bindable)
+{
+	ret(MLG_get_global_y($bindable))
+}
+fn MLG_GUI_is_button_active($this)
+{
+	ret(!$this.window_focus)
+}
+fn MLG_GUI_is_window_active($this, $window)
+{
+	ret($this.window_focus&&$this.windows[get_size($this.windows)-1]==$window)
+}
+fn MLG_GUI_handle_window_events($this, $window)
+{
+	if $this.window_focus
+	{
+		if $this.windows[get_size($this.windows)-1]!=$window
+		{
+			ret
+		}
+		$main_event=1
+	}
+	else
+	{
+		$main_event=0
+	}
+	$x=MLG_Bindable_get_global_x($window)
+	$y=MLG_Bindable_get_global_y($window)-60*MLG_GUI_SCALE-1
+	$width=$window.width*MLG_GUI_SCALE
+	$height=($window.height+60)*MLG_GUI_SCALE+1
+	$safe_area=MLG_WINDOW_SAFE_AREA*MLG_GUI_SCALE
+	$escape=EVT[EVT_X]<$x-$safe_area||EVT[EVT_X]>=$x+$width+$safe_area||EVT[EVT_Y]<$y-$safe_area||EVT[EVT_Y]>=$y+$height+$safe_area
+	if !$main_event
+	{
+		if EVT[EVT_TYPE]!=EVT_MOUSEBUTTONDOWN||$escape
+		{
+			ret
+		}
+		$this.window_focus=1
+		$a=get_size($this.windows)-1 while $a!=-1&&$this.windows[$a]!=$window
+		{
+			$a-1
+		}
+		if $a==-1
+		{
+			logf("Error: Window #%i isn't found in GUI #%i while handling events.\n", $window, $this)
+			exit(1)
+		}
+		copy($this.windows, $this.windows, $a, $a+1)
+		$this.windows[get_size($this.windows)-1]=$window
+	}
+	MLG_handle_window_events($window, $x, $y, $width, $height, $safe_area, !$escape)
+	if EVT[EVT_TYPE]==EVT_MOUSEBUTTONDOWN&&$escape
+	{
+		$this.window_focus=0
+	}
+}

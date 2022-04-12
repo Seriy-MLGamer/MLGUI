@@ -1,0 +1,64 @@
+/**
+ * Include before.
+ * ../object/Object.pixi
+ *
+ * Dependencies.
+ * ../node/Node_null.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Bindable;
+ * A base class for GUI elements that can be bound to Nodes. Bound elements can be processed by parent Node.
+ * @return an instance of Bindable.
+ * @see MLG_Movable_new()
+ */
+fn MLG_Bindable_new()
+{
+	$self=MLG_Object_new()
+	$self.f=MLG_Bindable
+
+	$self.parent=MLG_Node_null_new()
+	$self.prev=-1
+	$self.next=-1
+
+	ret($self)
+}
+
+fn MLG_Bindable_remove($self)
+{
+	$self.f.unbind($self)
+	$parent=$self.parent
+	$parent.f.remove($parent)
+
+	MLG_Object_remove($self)
+}
+
+fn MLG_Bindable_bind($self, $node)
+{
+	if $0<2
+	{
+		ret(1)
+	}
+	if $node<0
+	{
+		ret(2)
+	}
+	$parent=$self.parent
+	ret($parent.f.bind($parent, $self, $node))
+}
+fn MLG_Bindable_unbind($self)
+{
+	$parent=$self.parent
+	ret($parent.f.unbind($parent, $self))
+}
+
+MLG_Bindable=clone(MLG_Object)
+
+MLG_Bindable.remove=MLG_Bindable_remove
+
+MLG_Bindable.bind=MLG_Bindable_bind
+MLG_Bindable.unbind=MLG_Bindable_unbind

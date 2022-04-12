@@ -1,0 +1,91 @@
+/**
+ * Include before.
+ * ../../object/Object.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Size_absolute;
+ * A container with element size in pixels as fixed point numbers.
+ * @param $width
+ * @param $height
+ * @param $bindable aggregator of this object.
+ * @return an instance of class Size_absolute.
+ * @see MLG_Size_relative_new()
+ * @see MLG_Position_absolute_new()
+ */
+fn MLG_Size_absolute_new($width, $height, $bindable)
+{
+	$self=MLG_Object_new()
+	$self.f=MLG_Size_absolute
+
+	$self.bindable=$bindable
+	$self.width=$width
+	$self.height=$height
+
+	ret($self)
+}
+
+fn MLG_Size_absolute_get_width($self)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_width($parent, $self))
+}
+fn MLG_Size_absolute_get_height($self)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_height($parent, $self))
+}
+fn MLG_Size_absolute_set_width($self, $width)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_width($parent, $self, floor($width*(1<<15)))
+}
+fn MLG_Size_absolute_set_height($self, $height)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_height($parent, $self, floor($height*(1<<15)))
+}
+fn MLG_Size_absolute_set_absolute_width($self, $width)
+{
+	$self.width=floor($width*(1<<15))
+}
+fn MLG_Size_absolute_set_absolute_height($self, $height)
+{
+	$self.height=floor($height*(1<<15))
+}
+fn MLG_Size_absolute_set_relative_width($self, $width)
+{
+	$parent=$self.bindable.parent
+	$parent.f.set_relative_width($parent, $self, floor($width*(1<<15)))
+}
+fn MLG_Size_absolute_set_relative_height($self, $height)
+{
+	$parent=$self.bindable.parent
+	$parent.f.set_relative_height($parent, $self, floor($height*(1<<15)))
+}
+fn MLG_Size_absolute_to_absolute($self)
+{
+	ret($self)
+}
+fn MLG_Size_absolute_to_relative($self)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.size_to_relative($parent, $self))
+}
+
+MLG_Size_absolute=clone(MLG_Object)
+
+MLG_Size_absolute.get_width=MLG_Size_absolute_get_width
+MLG_Size_absolute.get_height=MLG_Size_absolute_get_height
+MLG_Size_absolute.set_width=MLG_Size_absolute_set_width
+MLG_Size_absolute.set_height=MLG_Size_absolute_set_height
+MLG_Size_absolute.set_absolute_width=MLG_Size_absolute_set_absolute_width
+MLG_Size_absolute.set_absolute_height=MLG_Size_absolute_set_absolute_height
+MLG_Size_absolute.set_relative_width=MLG_Size_absolute_set_relative_width
+MLG_Size_absolute.set_relative_height=MLG_Size_absolute_set_relative_height
+MLG_Size_absolute.to_absolute=MLG_Size_absolute_to_absolute
+MLG_Size_absolute.to_relative=MLG_Size_absolute_to_relative

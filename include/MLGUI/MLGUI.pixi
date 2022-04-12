@@ -1,6 +1,8 @@
-///"MLGUI" library v0.0.1.
-///(C) Серый MLGamer, 2021.
-///MIT license.
+/**
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
 
 MLG_THEME_LIGHT=0
 MLG_THEME_DARK= 1
@@ -9,71 +11,6 @@ MLG_MOBILE=0
 MLG_COLOR_THEME=MLG_THEME_DARK
 MLG_GUI_SCALE=1
 
-fn MLG_bind_algorithm($bindable, $buffer)
-{
-	if $buffer[0]!=-1
-	{
-		resize($buffer, get_size($buffer)+1)
-	}
-	$buffer[get_size($buffer)-1]=$bindable
-}
-fn MLG_unbind_algorithm($bindable, $buffer)
-{
-	if $bindable.parent<0
-	{
-		logf("Warning: Bindable #%i doesn't have a parent.\n", $bindable)
-		ret
-	}
-	$a=0 while $a!=get_size($buffer)
-	{
-		if $buffer[$a]==$bindable
-		{
-			break
-		}
-		$a+1
-	}
-	if $a==get_size($buffer)
-	{
-		logf("Error: Bindable #%i isn't found while unbinding.\n", $bindable)
-		exit(1)
-	}
-	if get_size($buffer)!=1
-	{
-		copy($buffer, $buffer, $a, $a+1, get_size($buffer)-$a-1)
-		resize($buffer, get_size($buffer)-1)
-	}
-	else
-	{
-		$buffer[0]=-1
-	}
-	$bindable.parent=-1
-}
-fn MLG_get_global_x($bindable)
-{
-	$result=$bindable.x*MLG_GUI_SCALE
-	if $bindable.align&LEFT
-	{
-		$result-WINDOW_XSIZE div 2
-	}
-	if $bindable.align&RIGHT
-	{
-		$result+WINDOW_XSIZE div 2
-	}
-	ret($result)
-}
-fn MLG_get_global_y($bindable)
-{
-	$result=$bindable.y*MLG_GUI_SCALE
-	if $bindable.align&TOP
-	{
-		$result-WINDOW_YSIZE div 2
-	}
-	if $bindable.align&BOTTOM
-	{
-		$result+WINDOW_YSIZE div 2
-	}
-	ret($result)
-}
 fn MLG_get_child_global_x($bindable_node, $bindable)
 {
 	$result=$bindable.x+MLG_Bindable_get_global_x($bindable_node)/MLG_GUI_SCALE+$bindable_node.width/2
@@ -242,12 +179,174 @@ fn MLG_handle_window_events($window, $x, $y, $width, $height, $safe_area, $enter
 	}
 }
 
-include "Classes/Node.pixih"
-include "Classes/Bindable.pixih"
-include "Classes/Image.pixih"
-include "Classes/Text.pixih"
-include "Classes/Button.pixih"
-include "Classes/Switch.pixih"
-include "Classes/Select.pixih"
-include "Classes/Window.pixih"
-include "Classes/GUI.pixih"
+MLG_MLGUI_FLAG_OPENGL=  0b00000000000000000000000000000001
+MLG_MLGUI_FLAG_NOT_KILL=0b00000000000000000000000000000010
+MLG_MLGUI_KILL_TIME=2000
+
+MLG_MLGUI_initialized=0
+
+fn MLG_MLGUI_init($flags)
+{
+	if MLG_MLGUI_initialized
+	{
+		MLG_MLGUI_deinit()
+	}
+	MLG_Node=new()
+	MLG_Node.get_child_global_x=MLG_Node_get_child_global_x
+	MLG_Node.get_child_global_y=MLG_Node_get_child_global_y
+	MLG_Node_bindable=clone(MLG_Node)
+	MLG_Node_bindable.get_child_global_x=MLG_Node_bindable_get_child_global_x
+	MLG_Node_bindable.get_child_global_y=MLG_Node_bindable_get_child_global_y
+	MLG_Node_movable=clone(MLG_Node_bindable)
+	MLG_Node_movable.get_child_global_x=MLG_Node_movable_get_child_global_x
+	MLG_Node_movable.get_child_global_y=MLG_Node_movable_get_child_global_y
+	start_timer()
+	MLG_MLGUI_default_GUI=MLG_GUI_new()
+	MLG_MLGUI_GUI=MLG_MLGUI_default_GUI
+	MLG_MLGUI_screen_callback=MLG_MLGUI_default_screen_callback
+	MLG_MLGUI_user_event_handler=MLG_MLGUI_default_user_event_handler
+	MLG_MLGUI_exit_request=0
+	MLG_MLGUI_exit_response=0
+	MLG_MLGUI_mutex=mutex_create()
+	MLG_MLGUI_flags=$flags
+	if $0>0&&$flags&MLG_MLGUI_FLAG_OPENGL
+	{
+		MLG_MLGUI_main_thread=thread_create(MLG_MLGUI_main_GL, 0)
+		set_gl_callback(MLG_MLGUI_GL_callback, 0)
+	}
+	else
+	{
+		MLG_MLGUI_main_thread=thread_create(MLG_MLGUI_main, 0)
+	}
+	MLG_MLGUI_initialized=1
+}
+fn MLG_MLGUI_deinit($flags)
+{
+	$start=get_timer()
+	MLG_MLGUI_exit_request=1
+	while $0==0||$flags&MLG_MLGUI_FLAG_NOT_KILL||get_timer()-$start<MLG_MLGUI_KILL_TIME&&!MLG_MLGUI_exit_response
+	{
+		sleep(10)
+	}
+	if MLG_MLGUI_flags&MLG_MLGUI_FLAG_OPENGL
+	{
+		set_gl_callback()
+	}
+	thread_destroy(MLG_MLGUI_main_thread)
+	MLG_GUI_remove(MLG_MLGUI_default_GUI)
+	mutex_destroy(MLG_MLGUI_mutex)
+	MLG_MLGUI_initialized=0
+}
+fn MLG_MLGUI_set_screen_callback($callback, $arguments)
+{
+	mutex_lock(MLG_MLGUI_mutex)
+	if $0>0&&$callback
+	{
+		MLG_MLGUI_screen_callback=$callback
+		MLG_MLGUI_screen_callback_arguments=$arguments
+	}
+	else
+	{
+		MLG_MLGUI_screen_callback=MLG_MLGUI_default_screen_callback
+	}
+	mutex_unlock(MLG_MLGUI_mutex)
+}
+fn MLG_MLGUI_set_user_event_handler($handler, $arguments)
+{
+	mutex_lock(MLG_MLGUI_mutex)
+	if $0>0&&$handler
+	{
+		MLG_MLGUI_user_event_handler=$handler
+		MLG_MLGUI_user_event_handler_arguments=$arguments
+	}
+	else
+	{
+		MLG_MLGUI_user_event_handler=MLG_MLGUI_default_user_event_handler
+	}
+	mutex_unlock(MLG_MLGUI_mutex)
+}
+fn MLG_MLGUI_set_GUI($gui)
+{
+	if $0>0&&$gui>=0
+	{
+		MLG_MLGUI_GUI=$gui
+	}
+	else
+	{
+		MLG_MLGUI_GUI=MLG_MLGUI_default_GUI
+	}
+}
+fn MLG_MLGUI_main($thread_id, $arguments)
+{
+	while 1
+	{
+		clear()
+		mutex_lock(MLG_MLGUI_mutex)
+		MLG_MLGUI_screen_callback(MLG_MLGUI_screen_callback_arguments)
+		if MLG_MLGUI_exit_request
+		{
+			mutex_unlock(MLG_MLGUI_mutex)
+			MLG_MLGUI_exit_response=1
+			ret
+		}
+		else
+		{
+			MLG_GUI_draw(MLG_MLGUI_GUI)
+			frame()
+			while get_event()
+			{
+				MLG_MLGUI_user_event_handler(MLG_MLGUI_user_event_handler_arguments)
+				MLG_GUI_handle_event(MLG_MLGUI_GUI)
+			}
+		}
+		mutex_unlock(MLG_MLGUI_mutex)
+	}
+}
+fn MLG_MLGUI_main_GL($thread_id, $arguments)
+{
+	while 1
+	{
+		frame()
+		if MLG_MLGUI_exit_request
+		{
+			MLG_MLGUI_exit_response=1
+			ret
+		}
+		else
+		{
+			mutex_lock(MLG_MLGUI_mutex)
+			while get_event()
+			{
+				MLG_GUI_user_event_handler(MLG_GUI_user_event_handler_arguments)
+				MLG_GUI_handle_event(MLG_MLGUI_GUI)
+			}
+			mutex_unlock(MLG_MLGUI_mutex)
+		}
+	}
+}
+fn MLG_MLGUI_GL_callback($arguments)
+{
+	$screen=get_screen()
+	set_screen(GL_SCREEN)
+	clear()
+	mutex_lock(MLG_MLGUI_mutex)
+	MLG_MLGUI_screen_callback(MLG_MLGUI_screen_callback_arguments)
+	if !MLG_MLGUI_exit_request
+	{
+		MLG_GUI_draw(MLG_MLGUI_GUI)
+	}
+	mutex_unlock(MLG_MLGUI_mutex)
+	set_screen($screen)
+}
+fn MLG_MLGUI_default_screen_callback($arguments){}
+fn MLG_MLGUI_default_user_event_handler($arguments){}
+
+include "classes/Node.pixih"
+include "classes/Bindable.pixih"
+include "classes/Image.pixih"
+include "classes/Text.pixih"
+include "classes/Button.pixih"
+include "classes/Switch.pixih"
+include "classes/Select.pixih"
+include "classes/Window.pixih"
+include "classes/GUI.pixih"

@@ -1,0 +1,26 @@
+/**
+ * Include before.
+ * system/movable/Positive.pixi
+ *
+ * Dependencies.
+ * system/node/Node_Transform.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Transform extends Positive;
+ */
+fn MLG_Transform_new($x, $y, $x_scale, $y_scale)
+{
+	$self=MLG_Positive_new(floor($x*(1<<15)), floor($y*(1<<15)), 0)
+	$self.f=MLG_Transform
+
+	$self.x_scale=floor($x_scale*(1<<15))
+	$self.y_scale=floor($y_scale*(1<<15))
+	$self.childs=MLG_Node_Transform_new($self)
+
+	ret($self)
+}

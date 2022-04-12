@@ -1,0 +1,367 @@
+/**
+ * Include before.
+ * ../object/Object.pixi
+ *
+ * Dependencies.
+ * ../movable/position/Position_absolute.pixi
+ * ../movable/position/Position_relative.pixi
+ * ../movable/size/Size_absolute.pixi
+ * ../movable/size/Size_relative.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Node_null;
+ * A class for Bindable elements that isn't bound to Node.
+ * @return an instance of Node_null.
+ * @see MLG_Bindable_new()
+ * @see MLG_Node_new()
+ */
+fn MLG_Node_null_new()
+{
+	$self=MLG_Object_new()
+	$self.f=MLG_Node_null
+
+	ret($self)
+}
+
+fn MLG_Node_null_bind($self, $element, $node)
+{
+	if $node.first_child<0
+	{
+		$node.first_child=$element
+	}
+	else
+	{
+		$element.prev=$node.last_child
+		$node.last_child.next=$element
+	}
+	$node.last_child=$element
+	$self.f.remove($self)
+	$element.parent=$node
+	ret(0)
+}
+fn MLG_Node_null_unbind($self, $element)
+{
+	ret(1)
+}
+fn MLG_Node_null_absolute_get_x($self, $position)
+{
+	$result=$position.x>>15
+	$align=$position.positive.align
+	if $align&RIGHT
+	{
+		$result+WINDOW_XSIZE div 2
+	}
+	if $align&LEFT
+	{
+		$result-WINDOW_XSIZE div 2
+	}
+	ret($result)
+}
+fn MLG_Node_null_absolute_get_y($self, $position)
+{
+	$result=$position.y>>15
+	$align=$position.positive.align
+	if $align&BOTTOM
+	{
+		$result+WINDOW_YSIZE div 2
+	}
+	if $align&TOP
+	{
+		$result-WINDOW_YSIZE div 2
+	}
+	ret($result)
+}
+fn MLG_Node_null_absolute_get_width($self, $size)
+{
+	ret($size.width>>15)
+}
+fn MLG_Node_null_absolute_get_height($self, $size)
+{
+	ret($size.height>>15)
+}
+fn MLG_Node_null_relative_get_x($self, $position)
+{
+	$result=$position.x
+	$align=$position.positive.align
+	if $align&RIGHT
+	{
+		$result+1<<15
+	}
+	if $align&LEFT
+	{
+		$result-1<<15
+	}
+	ret(WINDOW_XSIZE div 2*$result>>15)
+}
+fn MLG_Node_null_relative_get_y($self, $position)
+{
+	$result=$position.y
+	$align=$position.positive.align
+	if $align&BOTTOM
+	{
+		$result+1<<15
+	}
+	if $align&TOP
+	{
+		$result-1<<15
+	}
+	ret(WINDOW_YSIZE div 2*$result>>15)
+}
+fn MLG_Node_null_relative_get_width($self, $size)
+{
+	ret(WINDOW_XSIZE*$size.width>>15)
+}
+fn MLG_Node_null_relative_get_height($self, $size)
+{
+	ret(WINDOW_YSIZE*$size.height>>15)
+}
+fn MLG_Node_null_absolute_set_x($self, $position, $x)
+{
+	$align=$position.positive.align
+	if $align&RIGHT
+	{
+		$x-WINDOW_XSIZE div 2<<15
+	}
+	if $align&LEFT
+	{
+		$x+WINDOW_XSIZE div 2<<15
+	}
+	$position.x=$x
+}
+fn MLG_Node_null_absolute_set_y($self, $position, $y)
+{
+	$align=$position.positive.align
+	if $align&BOTTOM
+	{
+		$y-WINDOW_YSIZE div 2<<15
+	}
+	if $align&TOP
+	{
+		$y+WINDOW_YSIZE div 2<<15
+	}
+	$position.y=$y
+}
+fn MLG_Node_null_absolute_set_width($self, $size, $width)
+{
+	$size.width=$width
+}
+fn MLG_Node_null_absolute_set_height($self, $size, $height)
+{
+	$size.height=$height
+}
+fn MLG_Node_null_relative_set_x($self, $position, $x)
+{
+	$align=$position.positive.align
+	if $align&RIGHT
+	{
+		$x-WINDOW_XSIZE div 2<<15
+	}
+	if $align&LEFT
+	{
+		$x+WINDOW_XSIZE div 2<<15
+	}
+	$position.x=$x div(WINDOW_XSIZE div 2)
+}
+fn MLG_Node_null_relative_set_y($self, $position, $y)
+{
+	$align=$position.positive.align
+	if $align&BOTTOM
+	{
+		$y-WINDOW_YSIZE div 2<<15
+	}
+	if $align&TOP
+	{
+		$y+WINDOW_YSIZE div 2<<15
+	}
+	$position.y=$y div(WINDOW_YSIZE div 2)
+}
+fn MLG_Node_null_relative_set_width($self, $size, $width)
+{
+	$size.width=$width div WINDOW_XSIZE
+}
+fn MLG_Node_null_relative_set_height($self, $size, $height)
+{
+	$size.height=$height div WINDOW_YSIZE
+}
+fn MLG_Node_null_set_absolute_x($self, $position, $x)
+{
+	$position.x=$x div(WINDOW_XSIZE div 2)
+}
+fn MLG_Node_null_set_absolute_y($self, $position, $y)
+{
+	$position.y=$y div(WINDOW_YSIZE div 2)
+}
+MLG_Node_null_set_absolute_width=MLG_Node_null_relative_set_width
+MLG_Node_null_set_absolute_height=MLG_Node_null_relative_set_height
+fn MLG_Node_null_set_relative_x($self, $position, $x)
+{
+	$position.x=WINDOW_XSIZE div 2*$x
+}
+fn MLG_Node_null_set_relative_y($self, $position, $y)
+{
+	$position.y=WINDOW_YSIZE div 2*$y
+}
+fn MLG_Node_null_set_relative_width($self, $size, $width)
+{
+	$size.width=WINDOW_XSIZE*$width
+}
+fn MLG_Node_null_set_relative_height($self, $size, $height)
+{
+	$size.height=WINDOW_YSIZE*$height
+}
+fn MLG_Node_null_absolute_set_align($self, $position, $align)
+{
+	$positive=$position.positive
+	$prev_align=$positive.align
+	$x=$position.x
+	$y=$position.y
+	if $prev_align&RIGHT
+	{
+		$x+WINDOW_XSIZE div 2<<15
+	}
+	if $prev_align&BOTTOM
+	{
+		$y+WINDOW_YSIZE div 2<<15
+	}
+	if $prev_align&LEFT
+	{
+		$x-WINDOW_XSIZE div 2<<15
+	}
+	if $prev_align&TOP
+	{
+		$y-WINDOW_YSIZE div 2<<15
+	}
+	if $align&RIGHT
+	{
+		$x-WINDOW_XSIZE div 2<<15
+	}
+	if $align&BOTTOM
+	{
+		$y-WINDOW_YSIZE div 2<<15
+	}
+	if $align&LEFT
+	{
+		$x+WINDOW_XSIZE div 2<<15
+	}
+	if $align&TOP
+	{
+		$y+WINDOW_YSIZE div 2<<15
+	}
+	$position.x=$x
+	$position.y=$y
+	$positive.align=$align
+}
+fn MLG_Node_null_relative_set_align($self, $position, $align)
+{
+	$positive=$position.positive
+	$prev_align=$positive.align
+	$x=$position.x
+	$y=$position.y
+	if $prev_align&RIGHT
+	{
+		$x+1<<15
+	}
+	if $prev_align&BOTTOM
+	{
+		$y+1<<15
+	}
+	if $prev_align&LEFT
+	{
+		$x-1<<15
+	}
+	if $prev_align&TOP
+	{
+		$y-1<<15
+	}
+	if $align&RIGHT
+	{
+		$x-1<<15
+	}
+	if $align&BOTTOM
+	{
+		$y-1<<15
+	}
+	if $align&LEFT
+	{
+		$x+1<<15
+	}
+	if $align&TOP
+	{
+		$y+1<<15
+	}
+	$position.x=$x
+	$position.y=$y
+	$positive.align=$align
+}
+fn MLG_Node_null_position_to_absolute($self, $position)
+{
+	$positive=$position.positive
+	$absolute=MLG_Position_absolute_new(WINDOW_XSIZE div 2*$position.x, WINDOW_YSIZE div 2*$position.y, $positive)
+	$position.f.remove($position)
+	$positive.position=$absolute
+	ret($absolute)
+}
+fn MLG_Node_null_size_to_absolute($self, $size)
+{
+	$positive=$size.positive
+	$absolute=MLG_Size_absolute_new(WINDOW_XSIZE*$size.width, WINDOW_YSIZE*$size.height, $positive)
+	$size.f.remove($size)
+	$positive.size=$absolute
+	ret($absolute)
+}
+fn MLG_Node_null_position_to_relative($self, $position)
+{
+	$positive=$position.positive
+	$relative=MLG_Position_relative_new($position.x div(WINDOW_XSIZE div 2), $position.y div(WINDOW_YSIZE div 2), $positive)
+	$position.f.remove($position)
+	$positive.position=$relative
+	ret($relative)
+}
+fn MLG_Node_null_size_to_relative($self, $size)
+{
+	$positive=$size.positive
+	$relative=MLG_Size_relative_new($size.width div WINDOW_XSIZE, $size.height div WINDOW_YSIZE, $positive)
+	$size.f.remove($size)
+	$positive.size=$relative
+	ret($relative)
+}
+
+MLG_Node_null=clone(MLG_Object)
+
+MLG_Node_null.bind=MLG_Node_null_bind
+MLG_Node_null.unbind=MLG_Node_null_unbind
+MLG_Node_null.absolute_get_x=MLG_Node_null_absolute_get_x
+MLG_Node_null.absolute_get_y=MLG_Node_null_absolute_get_y
+MLG_Node_null.absolute_get_width=MLG_Node_null_absolute_get_width
+MLG_Node_null.absolute_get_height=MLG_Node_null_absolute_get_height
+MLG_Node_null.relative_get_x=MLG_Node_null_relative_get_x
+MLG_Node_null.relative_get_y=MLG_Node_null_relative_get_y
+MLG_Node_null.relative_get_width=MLG_Node_null_relative_get_width
+MLG_Node_null.relative_get_height=MLG_Node_null_relative_get_height
+MLG_Node_null.absolute_set_x=MLG_Node_null_absolute_set_x
+MLG_Node_null.absolute_set_y=MLG_Node_null_absolute_set_y
+MLG_Node_null.absolute_set_width=MLG_Node_null_absolute_set_width
+MLG_Node_null.absolute_set_height=MLG_Node_null_absolute_set_height
+MLG_Node_null.relative_set_x=MLG_Node_null_relative_set_x
+MLG_Node_null.relative_set_y=MLG_Node_null_relative_set_y
+MLG_Node_null.relative_set_width=MLG_Node_null_relative_set_width
+MLG_Node_null.relative_set_height=MLG_Node_null_relative_set_height
+MLG_Node_null.set_absolute_x=MLG_Node_null_set_absolute_x
+MLG_Node_null.set_absolute_y=MLG_Node_null_set_absolute_y
+MLG_Node_null.set_absolute_width=MLG_Node_null_set_absolute_width
+MLG_Node_null.set_absolute_height=MLG_Node_null_set_absolute_height
+MLG_Node_null.set_relative_x=MLG_Node_null_set_relative_x
+MLG_Node_null.set_relative_y=MLG_Node_null_set_relative_y
+MLG_Node_null.set_relative_width=MLG_Node_null_set_relative_width
+MLG_Node_null.set_relative_height=MLG_Node_null_set_relative_height
+MLG_Node_null.absolute_set_align=MLG_Node_null_absolute_set_align
+MLG_Node_null.relative_set_align=MLG_Node_null_relative_set_align
+MLG_Node_null.position_to_absolute=MLG_Node_null_position_to_absolute
+MLG_Node_null.size_to_absolute=MLG_Node_null_size_to_absolute
+MLG_Node_null.position_to_relative=MLG_Node_null_position_to_relative
+MLG_Node_null.size_to_relative=MLG_Node_null_size_to_relative

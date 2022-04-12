@@ -1,0 +1,71 @@
+/**
+ * Include before.
+ * Node_null.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Node extends Node_null;
+ * A class for GUI elements that can contain other elements.
+ * @return an instance of Node.
+ * @see MLG_Bindable_new()
+ */
+fn MLG_Node_new()
+{
+	$self=MLG_Node_null_new()
+	$self.f=MLG_Node
+
+	$self.first_child=-1
+	$self.last_child=-1
+
+	ret($self)
+}
+
+fn MLG_Node_remove($self)
+{
+	for ($a=$self.first_child; $a>=0; $a=$a.next)
+	{
+		$a.f.unbind($a)
+	}
+
+	MLG_Object_remove($self)
+}
+fn MLG_Node_bind($self, $element, $node)
+{
+	ret(3)
+}
+fn MLG_Node_unbind($self, $element)
+{
+	$prev=$element.prev
+	$next=$element.next
+	if $prev>=0
+	{
+		$prev.next=$next
+	}
+	if $next>=0
+	{
+		$next.prev=$prev
+	}
+	$node=$self.node
+	if $element==$node.first_child
+	{
+		$node.first_child=$next
+	}
+	if $element==$node.last_child
+	{
+		$node.last_child=$prev
+	}
+	$element.parent=MLG_Node_null_new()
+	$element.prev=-1
+	$element.next=-1
+	ret(0)
+}
+
+MLG_Node=clone(MLG_Node_null)
+
+MLG_Node.remove=MLG_Node_remove
+MLG_Node.bind=MLG_Node_bind
+MLG_Node.unbind=MLG_Node_unbind

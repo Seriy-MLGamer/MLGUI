@@ -1,10 +1,14 @@
-///class Window: Movable, Node
-///
-///A Window GUI element. It can contain other GUI elements in its graphical environment.
-///
-///"MLGUI" library v0.0.1.
-///(C) Серый MLGamer, 2021.
-///MIT license.
+/**
+ * Include before.
+ * system/movable/Movable.pixi
+ *
+ * Dependencies.
+ * system/node/Node_Movable.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
 
 MLG_WINDOW_DRAGGABLE=  0b1
 MLG_WINDOW_RESIZABLE= 0b10
@@ -15,37 +19,39 @@ MLG_WINDOW_INHERIT_REMOVES=0b10
 MLG_WINDOW_SAFE_AREA=20
 
 /**
- * \brief Alternative constructor. Adds Window properties to entered container without creating new container. Useful for multiple inheritance in class constructors.
- * \param $this an output container.
- * \param $title a text on top of Window.
- * \param $x
- * \param $y
- * \param $width
- * \param $height
- * \param $flags flags of Window (how it should work or appear).
- * \see MLG_Window_new()
+ * class Window extends Movable;
+ * @param $title a text on top of Window.
+ * @param $x position in pixels.
+ * @param $y position in pixels.
+ * @param $width size in pixels.
+ * @param $height size in pixels.
+ * @param $flags flags of Window (how it should work or appear).
+ * @return an instance of Window.
+ * @see MLG_Window_bind()
+ * @see MLG_Window_unbind()
+ * @see MLG_Window_draw()
+ * @see MLG_Window_handle_events()
+ * @see MLG_Window_remove()
  */
-fn MLG_Window($this, $title, $x, $y, $width, $height, $flags)
+fn MLG_Window_new($title, $x, $y, $width, $height, $flags)
 {
-	MLG_Bindable($this, $x, $y)
-	MLG_Node($this)
+	$self=MLG_Movable_new(floor($x*(1<<15)), floor($y*(1<<15)), floor($width*(1<<15)), floor($height*(1<<15)), 0)
 
-	$this.title=MLG_Text_new($title, 6, -55, $width, 6)
-	$this.width=$width
-	$this.height=$height
-	$this.flags=$flags
+	$self.title=MLG_Text_new($title, 6, -55, $width, 6)
+	$self.flags=$flags
 
-	$this.color=#00FFFF
-	$this.transp=255
-	$this.drag=0
-	$this.drag_x=0
-	$this.drag_y=0
-	$this.images=new(1, 1, INT)
-	$this.texts=new(1, 1, INT)
-	$this.buttons=new(1, 1, INT)
-	$this.get_child_global_x=MLG_get_child_global_x
-	$this.get_child_global_y=MLG_get_child_global_y
-	$this.is_button_active=MLG_Window_is_button_active
+	$self.childs=MLG_Node_Movable_new($self)
+	$self.color=#00FFFF
+	$self.transp=255
+	$self.drag=0
+	$self.drag_x=0
+	$self.drag_y=0
+	$self.images=new(1, 1, INT)
+	$self.texts=new(1, 1, INT)
+	$self.buttons=new(1, 1, INT)
+	$self.get_child_global_x=MLG_get_child_global_x
+	$self.get_child_global_y=MLG_get_child_global_y
+	$self.is_button_active=MLG_Window_is_button_active
 
 	$this.title.parent=$this
 	$this.title.align=TOP|LEFT
@@ -63,17 +69,16 @@ fn MLG_Window($this, $title, $x, $y, $width, $height, $flags)
  * \param $height
  * \param $flags flags of Window (how it should work or appear).
  * \return a container with Window properties.
- * \see MLG_Window_bind()
- * \see MLG_Window_unbind()
- * \see MLG_Window_draw()
- * \see MLG_Window_handle_events()
- * \see MLG_Window_remove()
+
  */
 fn MLG_Window_new($title, $x, $y, $width, $height, $flags)
 {
-	$window=new()
-	MLG_Window($window, $title, $x, $y, $width, $height, $flags)
-	ret($window)
+	$self=MLG_Node_new()
+	$self.f=MLG_Window
+
+	$self.binding=MLG_Bindable_new($self)
+
+	ret($self)
 }
 /**
  * \brief Removes a Window.

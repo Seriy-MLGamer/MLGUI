@@ -1,0 +1,46 @@
+/**
+ * Include before.
+ * Positive.pixi
+ *
+ * Dependencies.
+ * size/Size_absolute.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Movable extends Positive;
+ * Movable elements have size, position on the screen and align to its corners. If this element is bound to Node element, it can be processed by Node. If it's bound to Movable Node element, it can also inherit Node's position and align to Node's corners.
+ * @param $x position in pixels as fixed point number.
+ * @param $y position in pixels as fixed point number.
+ * @param $width size in pixels as fixed point number.
+ * @param $height size in pixels as fixed point number.
+ * @param $align align to corners of the screen. It's a combination of constants RIGHT, BOTTOM, LEFT and TOP.
+ * @return an instance of Movable.
+ * @see MLG_Movable_get_global_x()
+ * @see MLG_Movable_get_global_y()
+ * @see MLG_Bindable_new()
+ */
+fn MLG_Movable_new($x, $y, $width, $height, $align)
+{
+	$self=MLG_Positive_new($x, $y, $align)
+	$self.f=MLG_Movable
+
+	$self.size=MLG_Size_absolute_new($width, $height, $self)
+
+	ret($self)
+}
+
+fn MLG_Movable_remove($self)
+{
+	$size=$self.size
+	$size.f.remove($size)
+
+	MLG_Positive_remove($self)
+}
+
+MLG_Movable=clone(MLG_Positive)
+
+MLG_Movable.remove=MLG_Movable_remove

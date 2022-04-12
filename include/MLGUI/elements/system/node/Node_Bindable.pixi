@@ -1,0 +1,221 @@
+/**
+ * Include before.
+ * Node.pixi
+ *
+ * "MLGUI" library v0.0.1.
+ * (C) Серый MLGamer, 2022.
+ * MIT license.
+ */
+
+/**
+ * class Node_Bindable extends Node;
+ * A subclass of Node for Bindable elements. It has modified behavior.
+ * @param $bindable a Bindable element that aggregates this object.
+ * @return an instance of Node_Bindable.
+ * @see MLG_Bindable_new()
+ */
+fn MLG_Node_Bindable_new($bindable)
+{
+	$self=MLG_Node_new()
+	$self.f=MLG_Node_Bindable
+
+	$self.bindable=$bindable
+
+	ret($self)
+}
+
+fn MLG_Node_Bindable_bind($self, $element, $node)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.bind($parent, $element, $node))
+}
+fn MLG_Node_Bindable_unbind($self, $element)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.unbind($parent, $element))
+}
+fn MLG_Node_Bindable_absolute_get_x($self, $position)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_x($parent, $position))
+}
+fn MLG_Node_Bindable_absolute_get_y($self, $position)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_y($parent, $position))
+}
+fn MLG_Node_Bindable_absolute_get_width($self, $size)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_width($parent, $size))
+}
+fn MLG_Node_Bindable_absolute_get_height($self, $size)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.absolute_get_height($parent, $size))
+}
+fn MLG_Node_Bindable_relative_get_x($self, $position)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.relative_get_x($parent, $position))
+}
+fn MLG_Node_Bindable_relative_get_y($self, $position)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.relative_get_y($parent, $position))
+}
+fn MLG_Node_Bindable_relative_get_width($self, $size)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.relative_get_width($parent, $size))
+}
+fn MLG_Node_Bindable_relative_get_height($self, $size)
+{
+	$parent=$self.bindable.parent
+	ret($parent.f.relative_get_height($parent, $size))
+}
+fn MLG_Node_Bindable_absolute_set_x($self, $position, $x)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_x($parent, $position, $x)
+}
+fn MLG_Node_Bindable_absolute_set_y($self, $position, $y)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_y($parent, $position, $y)
+}
+fn MLG_Node_Bindable_absolute_set_width($self, $size, $width)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_width($parent, $size, $width)
+}
+fn MLG_Node_Bindable_absolute_set_height($self, $size, $height)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_height($parent, $size, $height)
+}
+fn MLG_Node_Bindable_relative_set_x($self, $position, $x)
+{
+	$parent=$self.bindable.parent
+	$parent.f.relative_set_x($parent, $position, $x)
+}
+fn MLG_Node_Bindable_relative_set_y($self, $position, $y)
+{
+	$parent=$self.bindable.parent
+	$parent.f.relative_set_y($parent, $position, $y)
+}
+fn MLG_Node_Bindable_relative_set_width($self, $size, $width)
+{
+	$parent=$self.bindable.parent
+	$parent.f.relative_set_width($parent, $size, $width)
+}
+fn MLG_Node_Bindable_relative_set_height($self, $size, $height)
+{
+	$parent=$self.bindable.parent
+	$parent.f.relative_set_height($parent, $size, $height)
+}
+fn MLG_Node_Bindable_set_absolute_x($self, $position, $x)
+{
+	$parent=$self.position.parent
+	$parent.f.set_absolute_x($parent, $position, $x)
+}
+fn MLG_Node_Bindable_set_absolute_y($self, $position, $y)
+{
+	$parent=$self.position.parent
+	$parent.f.set_absolute_y($parent, $position, $y)
+}
+fn MLG_Node_Bindable_set_absolute_width($self, $size, $width)
+{
+	$parent=$self.position.parent
+	$parent.f.set_absolute_width($parent, $size, $width)
+}
+fn MLG_Node_Bindable_set_absolute_height($self, $size, $height)
+{
+	$parent=$self.position.parent
+	$parent.f.set_absolute_height($parent, $size, $height)
+}
+fn MLG_Node_Bindable_set_relative_x($self, $position, $x)
+{
+	$parent=$self.position.parent
+	$parent.f.set_relative_x($parent, $position, $x)
+}
+fn MLG_Node_Bindable_set_relative_y($self, $position, $y)
+{
+	$parent=$self.position.parent
+	$parent.f.set_relative_y($parent, $position, $y)
+}
+fn MLG_Node_Bindable_set_relative_width($self, $size, $width)
+{
+	$parent=$self.position.parent
+	$parent.f.set_relative_width($parent, $size, $width)
+}
+fn MLG_Node_Bindable_set_relative_height($self, $size, $height)
+{
+	$parent=$self.position.parent
+	$parent.f.set_relative_height($parent, $size, $height)
+}
+fn MLG_Node_Bindable_absolute_set_align($self, $position, $align)
+{
+	$parent=$self.bindable.parent
+	$parent.f.absolute_set_align($parent, $position, $align)
+}
+fn MLG_Node_Bindable_relative_set_align($self, $position, $align)
+{
+	$parent=$self.bindable.parent
+	$parent.f.relative_set_align($parent, $position, $align)
+}
+fn MLG_Node_Bindable_position_to_absolute($self, $position)
+{
+	$parent=$self.bindable.parent
+	$parent.f.position_to_absolute($parent, $position)
+}
+fn MLG_Node_Bindable_size_to_absolute($self, $size)
+{
+	$parent=$self.bindable.parent
+	$parent.f.size_to_absolute($parent, $size)
+}
+fn MLG_Node_Bindable_position_to_relative($self, $position)
+{
+	$parent=$self.bindable.parent
+	$parent.f.position_to_relative($parent, $position)
+}
+fn MLG_Node_Bindable_size_to_relative($self, $size)
+{
+	$parent=$self.bindable.parent
+	$parent.f.size_to_relative($parent, $size)
+}
+
+MLG_Node_Bindable=clone(MLG_Node)
+
+MLG_Node_Bindable.bind=MLG_Node_Bindable_bind
+MLG_Node_Bindable.unbind=MLG_Node_Bindable_unbind
+MLG_Node_Bindable.absolute_get_x=MLG_Node_Bindable_absolute_get_x
+MLG_Node_Bindable.absolute_get_y=MLG_Node_Bindable_absolute_get_y
+MLG_Node_Bindable.absolute_get_width=MLG_Node_Bindable_absolute_get_width
+MLG_Node_Bindable.absolute_get_height=MLG_Node_Bindable_absolute_get_height
+MLG_Node_Bindable.relative_get_x=MLG_Node_Bindable_relative_get_x
+MLG_Node_Bindable.relative_get_y=MLG_Node_Bindable_relative_get_y
+MLG_Node_Bindable.relative_get_width=MLG_Node_Bindable_relative_get_width
+MLG_Node_Bindable.relative_get_height=MLG_Node_Bindable_relative_get_height
+MLG_Node_Bindable.absolute_set_x=MLG_Node_Bindable_absolute_set_x
+MLG_Node_Bindable.absolute_set_y=MLG_Node_Bindable_absolute_set_y
+MLG_Node_Bindable.absolute_set_width=MLG_Node_Bindable_absolute_set_width
+MLG_Node_Bindable.absolute_set_height=MLG_Node_Bindable_absolute_set_height
+MLG_Node_Bindable.relative_set_x=MLG_Node_Bindable_relative_set_x
+MLG_Node_Bindable.relative_set_y=MLG_Node_Bindable_relative_set_y
+MLG_Node_Bindable.relative_set_width=MLG_Node_Bindable_relative_set_width
+MLG_Node_Bindable.relative_set_height=MLG_Node_Bindable_relative_set_height
+MLG_Node_Bindable.set_absolute_x=MLG_Node_Bindable_set_absolute_x
+MLG_Node_Bindable.set_absolute_y=MLG_Node_Bindable_set_absolute_y
+MLG_Node_Bindable.set_absolute_width=MLG_Node_Bindable_set_absolute_width
+MLG_Node_Bindable.set_absolute_height=MLG_Node_Bindable_set_absolute_height
+MLG_Node_Bindable.set_relative_x=MLG_Node_Bindable_set_relative_x
+MLG_Node_Bindable.set_relative_y=MLG_Node_Bindable_set_relative_y
+MLG_Node_Bindable.set_relative_width=MLG_Node_Bindable_set_relative_width
+MLG_Node_Bindable.set_relative_height=MLG_Node_Bindable_set_relative_height
+MLG_Node_Bindable.absolute_set_align=MLG_Node_Bindable_absolute_set_align
+MLG_Node_Bindable.relative_set_align=MLG_Node_Bindable_relative_set_align
+MLG_Node_Bindable.position_to_absolute=MLG_Node_Bindable_position_to_absolute
+MLG_Node_Bindable.size_to_absolute=MLG_Node_Bindable_size_to_absolute
+MLG_Node_Bindable.position_to_relative=MLG_Node_Bindable_position_to_relative
+MLG_Node_Bindable.size_to_relative=MLG_Node_Bindable_size_to_relative
